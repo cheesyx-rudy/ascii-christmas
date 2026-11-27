@@ -44,15 +44,6 @@ main{position:relative;z-index:1;display:flex;align-items:center;justify-content
 .credit{position:fixed;left:0;right:0;bottom:max(13px,env(safe-area-inset-bottom));z-index:7;text-align:center;color:rgba(232,216,165,.94);font-size:11px;letter-spacing:.13em;text-shadow:0 1px 10px #000,0 0 16px rgba(255,196,98,.24);pointer-events:none}
 .credit span{color:#667c6e;padding:0 5px}
 
-.fairy-lights{position:fixed;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;overflow:visible}
-.wire{fill:none;stroke:rgba(70,91,69,.65);stroke-width:2;stroke-linecap:round}
-.side-wire{stroke-width:1.6;opacity:.72}
-.bulb{stroke:rgba(255,255,255,.25);stroke-width:1;animation:bulb-pulse 2.8s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:center}
-.b-gold{fill:#ffd36c;filter:drop-shadow(0 0 5px rgba(255,195,84,.95))}
-.b-red{fill:#ff5b61;filter:drop-shadow(0 0 5px rgba(255,65,75,.9));animation-delay:.7s}
-.b-green{fill:#64e58a;filter:drop-shadow(0 0 6px rgba(69,227,127,.9));animation-delay:1.3s}
-.b-blue{fill:#73c9ff;filter:drop-shadow(0 0 5px rgba(95,180,255,.9));animation-delay:1.9s}
-@keyframes bulb-pulse{from{opacity:.55}to{opacity:1}}
 .ambient-glow{position:fixed;inset:auto 0 0;height:32vh;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(36,105,66,.15),transparent 70%)}
 
 .aurora{position:fixed;z-index:0;pointer-events:none;left:-18vw;top:-22vh;width:136vw;height:72vh;opacity:.45;filter:blur(44px);mix-blend-mode:screen;transform:rotate(-7deg);background:
@@ -73,15 +64,22 @@ body:before{animation:star-shimmer 11s ease-in-out infinite alternate}
 .winter-horizon svg{width:100%;height:100%;display:block}
 .ridge-back{fill:#0a1a25;opacity:.78}.ridge-front{fill:#0b2025;opacity:.9}
 .pine{fill:#07151b;opacity:.9}
+
+.star-aura{position:absolute;z-index:0;pointer-events:none;left:50%;top:-1.5%;width:clamp(150px,27vmin,285px);aspect-ratio:1;transform:translateX(-50%);border-radius:50%;opacity:.94;mix-blend-mode:screen;background:radial-gradient(circle,rgba(255,250,208,.42) 0%,rgba(255,224,132,.25) 13%,rgba(255,190,88,.13) 30%,rgba(255,170,75,.055) 48%,transparent 72%);filter:blur(8px);animation:star-glow 3.2s ease-in-out infinite alternate}
+.star-aura:before{content:"";position:absolute;inset:6%;border-radius:50%;background:conic-gradient(from 0deg,transparent 0deg,rgba(255,238,178,.09) 7deg,transparent 13deg,transparent 43deg,rgba(255,225,145,.13) 49deg,transparent 55deg,transparent 88deg,rgba(255,238,178,.08) 94deg,transparent 101deg,transparent 132deg,rgba(255,225,145,.12) 138deg,transparent 144deg,transparent 178deg,rgba(255,238,178,.08) 184deg,transparent 191deg,transparent 222deg,rgba(255,225,145,.12) 228deg,transparent 234deg,transparent 268deg,rgba(255,238,178,.08) 274deg,transparent 281deg,transparent 312deg,rgba(255,225,145,.11) 318deg,transparent 324deg,transparent 360deg);mask-image:radial-gradient(circle,transparent 0 13%,#000 29%,transparent 75%);filter:blur(4px);animation:star-rays 24s linear infinite}
+.star-aura:after{content:"";position:absolute;left:50%;top:50%;width:13%;height:13%;transform:translate(-50%,-50%);border-radius:50%;background:#fff8cf;box-shadow:0 0 9px 4px rgba(255,238,177,.8),0 0 24px 12px rgba(255,204,99,.42),0 0 58px 25px rgba(255,173,68,.2)}
+@keyframes star-glow{from{opacity:.68;transform:translateX(-50%) scale(.91)}to{opacity:1;transform:translateX(-50%) scale(1.12)}}
+@keyframes star-rays{to{transform:rotate(360deg)}}
+
 .scene:before{inset:-1%;background:
  radial-gradient(ellipse at 50% 53%,rgba(33,143,80,.30),rgba(20,80,61,.16) 39%,transparent 72%),
  radial-gradient(ellipse at 50% 86%,rgba(255,196,104,.19),transparent 40%),
  radial-gradient(ellipse at 50% 100%,rgba(204,231,236,.18),transparent 54%);filter:blur(27px)}
 .scene:after{left:4%;right:4%;bottom:1%;height:25%;background:radial-gradient(ellipse,rgba(209,235,240,.15),rgba(120,176,168,.05) 42%,transparent 72%);filter:blur(20px)}
-#render{filter:drop-shadow(0 0 3px rgba(62,222,128,.18)) drop-shadow(0 0 12px rgba(26,158,92,.10))}
+#render{filter:drop-shadow(0 0 2px rgba(77,255,137,.32)) drop-shadow(0 0 7px rgba(26,220,104,.19))}
 
-@media(max-width:520px){.hud{font-size:9px;left:8px;right:8px;bottom:7px}.credit{font-size:10px;letter-spacing:.1em}.moon-halo{top:12%;right:7%;width:70px}.winter-horizon{height:20vh;min-height:100px}.aurora{top:-12vh;height:52vh;opacity:.34}.fairy-lights .side-wire{opacity:.45}}
-@media(prefers-reduced-motion:reduce){.credit{text-shadow:none}.bulb{animation:none}}
+@media(max-width:520px){.hud{font-size:9px;left:8px;right:8px;bottom:7px}.credit{font-size:10px;letter-spacing:.1em}.moon-halo{top:12%;right:7%;width:70px}.winter-horizon{height:20vh;min-height:100px}.aurora{top:-12vh;height:52vh;opacity:.34}.star-aura{top:0;width:clamp(118px,34vmin,190px)}}
+@media(prefers-reduced-motion:reduce){.credit{text-shadow:none}.star-aura,.star-aura:before{animation:none}}
 </style></head>
 <body>
 <canvas id="page-snow" aria-hidden="true"></canvas>
@@ -94,32 +92,11 @@ body:before{animation:star-shimmer 11s ease-in-out infinite alternate}
   <g class="pine pine-a"><path d="M0 300 L0 245 22 266 10 263 31 230 20 237 42 195 64 237 53 230 73 264 61 260 83 288 83 300Z"/><path d="M132 300 L132 255 148 270 139 267 157 235 149 240 169 201 189 240 180 235 198 270 187 267 205 290 205 300Z"/><path d="M330 300 L330 253 348 269 337 264 360 224 351 231 374 181 398 231 387 224 408 267 397 263 420 292 420 300Z"/><path d="M605 300 L605 263 620 274 613 269 630 240 623 246 642 205 661 246 653 240 672 274 663 270 680 293 680 300Z"/><path d="M910 300 L910 252 930 270 919 264 943 220 932 229 956 174 982 229 970 220 993 267 982 263 1005 293 1005 300Z"/><path d="M1210 300 L1210 258 1226 272 1218 268 1236 234 1228 240 1248 193 1269 240 1260 234 1280 270 1270 266 1290 292 1290 300Z"/><path d="M1450 300 L1450 248 1468 265 1458 260 1480 218 1471 225 1494 174 1517 225 1507 218 1528 263 1518 259 1540 292 1540 300Z"/></g>
  </svg>
 </div>
-<svg class="fairy-lights" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
-  <defs>
-    <filter id="bulb-glow" x="-250%" y="-250%" width="600%" height="600%">
-      <feGaussianBlur stdDeviation="5" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-  </defs>
-  <path class="wire" d="M0 15 C130 88 190 6 310 38 S500 78 620 35 S850 5 1000 48"/>
-  <path class="wire side-wire" d="M18 45 C-5 210 52 300 20 455 S-2 760 30 970"/>
-  <path class="wire side-wire" d="M982 50 C1008 210 950 330 980 500 S1005 790 970 970"/>
-  <g filter="url(#bulb-glow)">
-    <circle class="bulb b-gold" cx="65" cy="45" r="6"/><circle class="bulb b-red" cx="145" cy="61" r="5"/>
-    <circle class="bulb b-green" cx="230" cy="39" r="6"/><circle class="bulb b-blue" cx="320" cy="40" r="5"/>
-    <circle class="bulb b-gold" cx="410" cy="61" r="6"/><circle class="bulb b-red" cx="500" cy="58" r="5"/>
-    <circle class="bulb b-green" cx="592" cy="42" r="6"/><circle class="bulb b-blue" cx="690" cy="31" r="5"/>
-    <circle class="bulb b-gold" cx="790" cy="23" r="6"/><circle class="bulb b-red" cx="890" cy="25" r="5"/>
-    <circle class="bulb b-green" cx="965" cy="38" r="6"/>
-    <circle class="bulb b-red" cx="18" cy="230" r="5"/><circle class="bulb b-gold" cx="28" cy="430" r="6"/>
-    <circle class="bulb b-blue" cx="18" cy="650" r="5"/><circle class="bulb b-green" cx="27" cy="850" r="6"/>
-    <circle class="bulb b-green" cx="982" cy="245" r="6"/><circle class="bulb b-red" cx="974" cy="460" r="5"/>
-    <circle class="bulb b-gold" cx="985" cy="680" r="6"/><circle class="bulb b-blue" cx="976" cy="875" r="5"/>
-  </g>
-</svg>
+
 <div class="ambient-glow" aria-hidden="true"></div>
 <main>
   <section class="scene">
+    <div class="star-aura" aria-hidden="true"></div>
     <canvas id="render" width="1610" height="1610"></canvas>
     <div class="hud"><span>ASCII CHRISTMAS</span><span id="fps">30 FPS · 3D ASCII</span></div>
   </section>
@@ -128,15 +105,15 @@ body:before{animation:star-shimmer 11s ease-in-out infinite alternate}
 <script>
 (()=>{
 'use strict';
-const SCALE=2,W=1610,H=1610,MOBILE=window.matchMedia('(max-width: 560px)').matches,CW=MOBILE?20:10,CH=MOBILE?28:14,COLS=Math.floor(W/CW),ROWS=Math.floor(H/CH),CAM=9,FOCAL=2250*805/900*SCALE,TILT=.22,ZOOM=1.0,FRAME_Y=-55;
+const SCALE=2,W=1610,H=1610,MOBILE=window.matchMedia('(max-width: 560px)').matches,CW=MOBILE?24:12,CH=MOBILE?34:18,COLS=Math.floor(W/CW),ROWS=Math.floor(H/CH),CAM=9,FOCAL=2250*805/900*SCALE,TILT=.22,ZOOM=1.0,FRAME_Y=-35;
 const BASE=-1.2,TREE_H=2.5,TREE_R=1.15,TIERS=5;
 const C={gold:[255,205,70],red:[230,45,50],green:[30,155,48],wood:[110,70,40]};
 const BAUBLES=[C.red,C.gold,[70,130,255],[255,125,190],[255,150,40],[170,90,230]];
-const glyphChars='01#$%&*+=@';
+const glyphChars='@#%&$MWX80';
 const glyphMaskCanvas=document.createElement('canvas');
 glyphMaskCanvas.width=CW;glyphMaskCanvas.height=CH;
 const glyphMaskCtx=glyphMaskCanvas.getContext('2d',{willReadFrequently:true});
-glyphMaskCtx.font=`bold ${MOBILE?22:12}px "DejaVu Sans Mono", Consolas, "Courier New", monospace`;
+glyphMaskCtx.font=`900 ${MOBILE?27:16}px "DejaVu Sans Mono", Consolas, "Courier New", monospace`;
 glyphMaskCtx.textAlign='center';glyphMaskCtx.textBaseline='middle';glyphMaskCtx.fillStyle='#fff';
 const glyphs=glyphChars.split('').map(char=>{
   glyphMaskCtx.clearRect(0,0,CW,CH);
@@ -160,13 +137,13 @@ function buildScene(){
  // snowy ground disc, same point-cloud construction as source
  for(let i=0;i<34000;i++){const r=1.5*Math.sqrt(rnd()),a=rnd()*Math.PI*2,shade=190+rnd()*60;add(r*Math.cos(a),BASE-.02,r*Math.sin(a),[shade*.85,shade*.93,shade],r*.35)}
  for(let i=0;i<120;i++){const a=rnd()*Math.PI*2;add(.13*Math.cos(a),BASE+rnd()*.3,.13*Math.sin(a),C.wood,.2)}
- for(let i=0;i<22000;i++){const h=rnd()**.85,a=rnd()*Math.PI*2,r=treeRadius(h)*(1-rnd()**3*.85),k=rnd();add(r*Math.cos(a),BASE+h*TREE_H,r*Math.sin(a),[15+35*k,105+125*k,25+40*k],.4+h*2.8+rnd()*.25)}
+ for(let i=0;i<42000;i++){const h=rnd()**.85,a=rnd()*Math.PI*2,r=treeRadius(h)*(1-rnd()**3*.85),k=rnd();add(r*Math.cos(a),BASE+h*TREE_H,r*Math.sin(a),[10+24*k,168+82*k,18+30*k],.4+h*2.8+rnd()*.25)}
  // red garland spiral
- for(let i=0;i<3500;i++){const h=.07+i/3499*.83,a=h*5.5*2*Math.PI,r=treeRadius(h)*1.04;add(r*Math.cos(a),BASE+h*TREE_H+rand(-.02,.02),r*Math.sin(a),C.red.map(v=>v*rand(.8,1.1)),3.4+(h-.07)*2.2)}
+ for(let i=0;i<2100;i++){const h=.07+i/2099*.83,a=h*5.5*2*Math.PI,r=treeRadius(h)*1.035;add(r*Math.cos(a),BASE+h*TREE_H+rand(-.02,.02),r*Math.sin(a),C.red.map(v=>v*rand(.88,1.08)),3.4+(h-.07)*2.2)}
  // baubles
  for(let i=0;i<20;i++){const h=rand(.08,.85),a=rnd()*Math.PI*2,r=treeRadius(h)*.97,col=BAUBLES[i%BAUBLES.length];sphere(r*Math.cos(a),BASE+h*TREE_H-.03,r*Math.sin(a),.1,260,col,4.6+i*.12)}
  // five-point star point cloud
- let count=0;while(count<800){const x=rand(-1,1),y=rand(-1,1),ang=Math.atan2(y,x),rad=Math.hypot(x,y),d=Math.abs(((ang-Math.PI/2+Math.PI/5)%(2*Math.PI/5)+2*Math.PI)%(2*Math.PI/5)-Math.PI/5);if(rad<=1+(.42-1)*d/(Math.PI/5)){add(x*.19,BASE+TREE_H+.13+y*.19,rand(-.04,.04),[255,215,80],4.2);count++}}
+ let count=0;while(count<800){const x=rand(-1,1),y=rand(-1,1),ang=Math.atan2(y,x),rad=Math.hypot(x,y),d=Math.abs(((ang-Math.PI/2+Math.PI/5)%(2*Math.PI/5)+2*Math.PI)%(2*Math.PI/5)-Math.PI/5);if(rad<=1+(.42-1)*d/(Math.PI/5)){add(x*.19,BASE+TREE_H+.13+y*.19,rand(-.04,.04),[255,244,170],4.2);count++}}
  // gifts: point-cloud boxes with ribbon color
  const gifts=[
  [200,1.20,[.55,.42,.50],25,[150,100,210],C.gold,0],
@@ -200,7 +177,7 @@ function putGlyph(cell,idx){
   const coverage=mask[yy*CW+xx];
   if(!coverage)continue;
   const pi=((offY+yy)*W+offX+xx)*4;
-  pix[pi]=r;pix[pi+1]=g;pix[pi+2]=b;pix[pi+3]=coverage;
+  pix[pi]=r;pix[pi+1]=g;pix[pi+2]=b;pix[pi+3]=Math.min(255,Math.round(coverage*1.22));
  }
 }
 let elapsed=0,angle=0,paused=false,last=performance.now(),lastRender=0;
@@ -209,7 +186,7 @@ function render(){
  // nearest point wins each 5x7 character cell, matching the Python source renderer
  const points=[];
  for(let i=0;i<N;i++){if(T[i]>elapsed)continue;const q=project(P[i*3],P[i*3+1],P[i*3+2],angle);const cx=(q[0]/CW)|0,cy=(q[1]/CH)|0;if(cx<0||cx>=COLS||cy<0||cy>=ROWS)continue;const ci=cy*COLS+cx;if(q[2]>=cellDepth[ci]){cellDepth[ci]=q[2];cellIndex[ci]=i}}
- for(let ci=0;ci<cellIndex.length;ci++){const i=cellIndex[ci];if(i<0){cellRGB[ci*3]=0;cellRGB[ci*3+1]=0;cellRGB[ci*3+2]=0;continue}const z=cellDepth[ci],shade=Math.max(.45,Math.min(1,.45+.55*(z+2.2)/4.4));cellRGB[ci*3]=COL[i*3]*shade;cellRGB[ci*3+1]=COL[i*3+1]*shade;cellRGB[ci*3+2]=COL[i*3+2]*shade}
+ for(let ci=0;ci<cellIndex.length;ci++){const i=cellIndex[ci];if(i<0){cellRGB[ci*3]=0;cellRGB[ci*3+1]=0;cellRGB[ci*3+2]=0;continue}const z=cellDepth[ci],isFoliage=T[i]<3.3,shade=isFoliage?Math.max(.82,Math.min(1,.82+.18*(z+2.2)/4.4)):Math.max(.68,Math.min(1,.68+.32*(z+2.2)/4.4));cellRGB[ci*3]=Math.min(255,COL[i*3]*shade*(isFoliage?1.08:1.04));cellRGB[ci*3+1]=Math.min(255,COL[i*3+1]*shade*(isFoliage?1.10:1.05));cellRGB[ci*3+2]=Math.min(255,COL[i*3+2]*shade*(isFoliage?1.08:1.04))}
  for(let ci=0;ci<cellIndex.length;ci++){if(cellIndex[ci]>=0)putGlyph(ci,cellIndex[ci])}
  ctx.putImageData(image,0,0);
 }
