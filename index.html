@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#030608">
+<title>ASCII Christmas</title>
+<style>
+:root{--bg:#030608;--panel:#07100f;--line:#172a25;--green:#55e58b;--gold:#ffd66b;--red:#ff5964;--text:#b8c9c1;--muted:#60746b}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Consolas,"Cascadia Mono","Courier New",monospace}
+body{overflow-x:hidden}
+#snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+main{position:relative;z-index:1;min-height:100svh;width:min(100%,900px);margin:auto;padding:28px 20px 24px;display:flex;flex-direction:column;align-items:center}
+.top{width:100%;display:flex;justify-content:space-between;align-items:center;color:#71847b;font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.status{color:#d8bf72}.status:before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#62e99b;box-shadow:0 0 9px #62e99b;margin:0 8px 1px 0}
+.scene{width:100%;display:flex;justify-content:center;align-items:center;min-height:clamp(390px,58vh,650px);position:relative;padding:22px 0 6px}
+.scene:before{content:"";position:absolute;width:min(75vw,590px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(23,117,69,.19),rgba(7,40,29,.07) 45%,transparent 70%);filter:blur(8px)}
+#tree{position:relative;z-index:1;white-space:pre;font-size:clamp(7px,1.15vw,11px);line-height:1.16;font-weight:700;letter-spacing:.02em;text-align:center}
+.branch{height:1.16em;white-space:pre;opacity:0;transform:translateY(5px);animation:grow-in .48s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--row)*75ms)}
+@keyframes grow-in{to{opacity:1;transform:translateY(0)}}
+.g{color:#43d77d;text-shadow:0 0 7px rgba(67,215,125,.55)}
+.g2{color:#9aef9d;text-shadow:0 0 6px rgba(154,239,157,.35)}
+.y{color:#ffd66b;text-shadow:0 0 8px rgba(255,214,107,.7)}
+.r{color:#ff5964;text-shadow:0 0 8px rgba(255,89,100,.5)}
+.w{color:#e6f4ec;text-shadow:0 0 7px rgba(230,244,236,.45)}
+.twinkle{animation:twinkle 1.8s ease-in-out infinite alternate}
+@keyframes twinkle{from{opacity:.55}to{opacity:1;filter:brightness(1.5)}}
+.base-label{font-size:10px;letter-spacing:.18em;color:#52675d;margin:8px 0 24px;text-align:center}
+.terminal{width:100%;border:1px solid var(--line);background:rgba(5,12,13,.94);box-shadow:0 18px 55px rgba(0,0,0,.32)}
+.termbar{height:35px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 13px;font-size:11px;color:#a6b8ae}
+.lights{display:flex;gap:5px}.lights i{width:7px;height:7px;border-radius:50%;background:#33453e}.lights i:first-child{background:#a95a5c}.lights i:nth-child(2){background:#b89a51}.lights i:nth-child(3){background:#5b9c70}
+.running{color:#d8bf72}
+.code{padding:13px 15px 16px;min-height:170px;max-height:210px;overflow:hidden;font-size:clamp(10px,1.35vw,12px);line-height:1.72;color:#9aa9a1}
+.code-line{display:block;white-space:pre;opacity:0;animation:code-in .35s ease forwards;animation-delay:calc(var(--i)*.16s)}
+@keyframes code-in{to{opacity:1}}
+.n{display:inline-block;width:34px;color:#40534a;user-select:none}
+.kw{color:#e88f9b}.fn{color:#80d9bd}.str{color:#e5c779}.cm{color:#526a5e}.var{color:#a7c7ec}
+.bottom{width:100%;display:flex;justify-content:space-between;margin-top:16px;color:#43564d;font-size:10px;letter-spacing:.08em}
+@media(max-width:600px){
+ main{padding:20px 12px 18px}
+ .scene{min-height:55svh;min-height:clamp(360px,55svh,520px)}
+ #tree{font-size:clamp(6px,1.55vw,9px);line-height:1.12}
+ .top{font-size:9px}
+ .base-label{font-size:9px;margin-bottom:18px}
+ .code{min-height:160px;padding:10px 8px;font-size:10px}
+ .n{width:28px}
+}
+@media(prefers-reduced-motion:reduce){.branch,.code-line{animation:none;opacity:1;transform:none}.twinkle{animation:none}}
+</style>
+</head>
+<body>
+<canvas id="snow" aria-hidden="true"></canvas>
+<main>
+ <header class="top"><span>ASCII&nbsp; / &nbsp;WINTER SCENE</span><span class="status">LIVE ANIMATION</span></header>
+ <section class="scene"><div id="tree" aria-label="Ёлка из символов"></div></section>
+ <div class="base-label">GROWING TREE &nbsp;·&nbsp; FALLING SNOW &nbsp;·&nbsp; PURE CHARACTERS</div>
+ <section class="terminal">
+  <div class="termbar"><span><span class="lights"><i></i><i></i><i></i></span>&nbsp;&nbsp; christmas_tree.py</span><span class="running">● running&nbsp; · &nbsp;30 fps</span></div>
+  <div class="code" id="code"></div>
+ </section>
+ <footer class="bottom"><span>MADE WITH ASCII</span><span>HAPPY HOLIDAYS ✦</span></footer>
+</main>
+<script>
+(() => {
+ const tree=document.getElementById('tree');
+ const H=25, palette=['g','g','g2','g','g','g2'];
+ const ornaments=['y','r','w'];
+ // Build the tree once: stable characters, no frame-to-frame flicker.
+ let seed=87341;
+ const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+ for(let row=0;row<H;row++){
+   const width=2*row+1, pad=H-row-1;
+   let line=' '.repeat(pad);
+   for(let col=0;col<width;col++){
+     const edge=col===0||col===width-1;
+     let ch,cls;
+     if(row===0){ch='✦';cls='y';}
+     else {
+       const p=rand();
+       if(p<.065){ch=['*','+','✧'][Math.floor(rand()*3)];cls='y';}
+       else if(p<.105){ch=['o','@'][Math.floor(rand()*2)];cls='r';}
+       else if(p<.13){ch='◆';cls='w';}
+       else {ch=['#','%','&','x','+','o','*'][Math.floor(rand()*7)];cls=palette[Math.floor(rand()*palette.length)];}
+       if(edge && rand()<.52) cls='g2';
+     }
+     const sparkle=(cls==='y'||cls==='w')&&rand()<.48;
+     line+=`<span class="${cls}${sparkle?' twinkle':''}"${sparkle?` style="animation-delay:${(rand()*2).toFixed(2)}s"`:''}>${ch}</span>`;
+   }
+   const el=document.createElement('div');el.className='branch';el.style.setProperty('--row',row);el.textContent='';
+   el.innerHTML=line;tree.appendChild(el);
+ }
+ // trunk and little gifts, revealed after the branches.
+ const trunk=document.createElement('div');trunk.className='branch';trunk.style.setProperty('--row',H+1);
+ trunk.innerHTML=' '.repeat(H-2)+'<span class="y">|||</span>';tree.appendChild(trunk);
+ const gifts=document.createElement('div');gifts.className='branch';gifts.style.setProperty('--row',H+2);
+ gifts.innerHTML=' '.repeat(H-8)+'<span class="r">[=]</span>  <span class="y">✦</span>  <span class="r">[=]</span>';tree.appendChild(gifts);
+
+ const snippets=[
+  '# a little winter magic, made of text',
+  'for row in range(tree_height):',
+  '    width = row * 2 + 1',
+  '    branch = make_ascii_branch(width)',
+  '    render(branch, palette=COLORS)',
+  '',
+  'snowfall.start(density=0.72)',
+  'lights.twinkle(colors=("green", "gold", "red"))',
+  '',
+  'while animation.is_running:',
+  '    scene.update()',
+  '    display.render(fps=30)'
+ ];
+ const code=document.getElementById('code');
+ snippets.forEach((s,i)=>{
+  const el=document.createElement('span');el.className='code-line';el.style.setProperty('--i',i);
+  const escaped=s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const colored=escaped.replace(/(#.*)$/,'<span class="cm">$1</span>')
+   .replace(/\b(for|in|range|while)\b/g,'<span class="kw">$1</span>')
+   .replace(/\b(make_ascii_branch|render|start|twinkle|update|display)\b/g,'<span class="fn">$1</span>')
+   .replace(/\b(tree_height|width|branch|palette|COLORS|snowfall|density|colors|animation|scene|fps)\b/g,'<span class="var">$1</span>')
+   .replace(/(&quot;.*?&quot;)/g,'<span class="str">$1</span>');
+  el.innerHTML=`<span class="n">${420+i}</span>${colored}`;code.appendChild(el);
+ });
+
+ // Lightweight canvas snowfall with a fixed star field.
+ const canvas=document.getElementById('snow'),ctx=canvas.getContext('2d');
+ let w=0,h=0,dpr=1,stars=[],flakes=[];
+ function resize(){
+  dpr=Math.min(devicePixelRatio||1,2);w=innerWidth;h=innerHeight;
+  canvas.width=w*dpr;canvas.height=h*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);
+  stars=Array.from({length:Math.floor(w*h/4800)},()=>({x:Math.random()*w,y:Math.random()*h,r:.3+Math.random()*.9,a:.15+Math.random()*.55,phase:Math.random()*6}));
+  flakes=Array.from({length:Math.max(45,Math.floor(w/7))},()=>({x:Math.random()*w,y:Math.random()*h,r:.5+Math.random()*1.25,v:.35+Math.random()*.75,dr:(Math.random()-.5)*.28,a:.2+Math.random()*.6}));
+ }
+ function frame(t){
+  ctx.clearRect(0,0,w,h);
+  for(const s of stars){ctx.globalAlpha=s.a*(.65+.35*Math.sin(t*.001+s.phase));ctx.fillStyle='#d9eee6';ctx.fillRect(s.x,s.y,s.r,s.r)}
+  for(const f of flakes){f.y+=f.v;f.x+=f.dr+Math.sin(t*.0006+f.y*.01)*.12;if(f.y>h+3){f.y=-3;f.x=Math.random()*w}if(f.x<0)f.x=w;if(f.x>w)f.x=0;ctx.globalAlpha=f.a;ctx.fillStyle='#e6f3ef';ctx.beginPath();ctx.arc(f.x,f.y,f.r,0,Math.PI*2);ctx.fill()}
+  ctx.globalAlpha=1;requestAnimationFrame(frame);
+ }
+ addEventListener('resize',resize,{passive:true});resize();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
