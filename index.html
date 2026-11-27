@@ -79,9 +79,28 @@ body:before{animation:star-shimmer 11s ease-in-out infinite alternate}
 #render{filter:drop-shadow(0 0 2px rgba(77,255,137,.32)) drop-shadow(0 0 7px rgba(26,220,104,.19))}
 
 @media(max-width:520px){.hud{font-size:9px;left:8px;right:8px;bottom:7px}.credit{font-size:10px;letter-spacing:.1em}.moon-halo{top:12%;right:7%;width:70px}.winter-horizon{height:20vh;min-height:100px}.aurora{top:-12vh;height:52vh;opacity:.34}.star-aura{top:0;width:clamp(118px,34vmin,190px)}}
+/* New Year countdown: compact glass panel above the existing scene. */
+.countdown{position:fixed;z-index:7;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(560px,calc(100vw - 28px));padding:11px 16px 10px;border:1px solid rgba(231,207,146,.24);border-radius:17px;background:linear-gradient(135deg,rgba(5,16,22,.80),rgba(12,28,30,.66));box-shadow:0 12px 38px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.07),0 0 28px rgba(211,174,94,.08);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);text-align:center;pointer-events:none}
+.countdown-heading{margin:0 0 8px;color:rgba(224,211,170,.82);font-size:9px;line-height:1;letter-spacing:.24em;text-transform:uppercase;text-shadow:0 0 12px rgba(255,206,118,.2)}
+.countdown-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.countdown-unit{min-width:0;display:flex;flex-direction:column;align-items:center;gap:4px}
+.countdown-value{font-variant-numeric:tabular-nums;font-weight:700;font-size:clamp(21px,3.2vw,30px);line-height:1;color:#f5e9bd;letter-spacing:.055em;text-shadow:0 0 7px rgba(255,225,153,.48),0 0 19px rgba(238,186,92,.24)}
+.countdown-label{font-size:8px;line-height:1;color:rgba(187,207,197,.73);letter-spacing:.16em;text-transform:uppercase}
+#fireworks-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:6;display:block;pointer-events:none}
+@media(max-width:520px){.countdown{top:max(10px,env(safe-area-inset-top));width:calc(100vw - 24px);padding:10px 11px 9px;border-radius:14px}.countdown-heading{font-size:8px;letter-spacing:.19em;margin-bottom:7px}.countdown-grid{gap:4px}.countdown-unit{gap:4px}.countdown-value{font-size:clamp(21px,6.1vw,27px);letter-spacing:.025em}.countdown-label{font-size:7px;letter-spacing:.12em}}
 @media(prefers-reduced-motion:reduce){.credit{text-shadow:none}.star-aura,.star-aura:before{animation:none}}
 </style></head>
 <body>
+<section class="countdown" aria-label="Обратный отсчёт до Нового года">
+ <p class="countdown-heading">До Нового года</p>
+ <div class="countdown-grid" role="timer" aria-live="off">
+  <div class="countdown-unit"><span class="countdown-value" id="cd-days">000</span><span class="countdown-label">Дней</span></div>
+  <div class="countdown-unit"><span class="countdown-value" id="cd-hours">00</span><span class="countdown-label">Часов</span></div>
+  <div class="countdown-unit"><span class="countdown-value" id="cd-minutes">00</span><span class="countdown-label">Минут</span></div>
+  <div class="countdown-unit"><span class="countdown-value" id="cd-seconds">00</span><span class="countdown-label">Секунд</span></div>
+ </div>
+</section>
+<canvas id="fireworks-canvas" aria-hidden="true"></canvas>
 <canvas id="page-snow" aria-hidden="true"></canvas>
 <div class="aurora" aria-hidden="true"></div>
 <div class="moon-halo" aria-hidden="true"><div class="moon"></div></div>
@@ -168,6 +187,9 @@ function buildScene(){
 }
 buildScene();
 const N=T.length;
+// End timestamp of the original progressive tree construction.
+let TREE_BUILD_END=0;for(const stamp of T)if(stamp>TREE_BUILD_END)TREE_BUILD_END=stamp;
+const TREE_BUILD_DURATION=TREE_BUILD_END+.04;
 const cellDepth=new Float32Array(COLS*ROWS),cellIndex=new Int32Array(COLS*ROWS),cellRGB=new Uint8Array(COLS*ROWS*3);
 function project(x,y,z,angle){const c=Math.cos(angle),s=Math.sin(angle),rx=x*c+z*s,rz=-x*s+z*c,ct=Math.cos(TILT),st=Math.sin(TILT),yy=y*ct-rz*st,zz=y*st+rz*ct,k=FOCAL*ZOOM/(CAM-zz);return [W/2+rx*k,H/2-yy*k+FRAME_Y,zz]}
 function putGlyph(cell,idx){
@@ -245,5 +267,162 @@ function drawPageSnow(now){
 window.addEventListener('resize',resizePageSnow,{passive:true});
 resizePageSnow();
 requestAnimationFrame(drawPageSnow);
+// ---------------------------------------------------------------------------
+// Aeryx Christmas additions: local New Year countdown + once-a-day fireworks.
+// A deterministic clock hook is only available in explicit ?aeryxTest=1 mode.
+// ---------------------------------------------------------------------------
+const testMode=new URLSearchParams(window.location.search).has('aeryxTest');
+let testNow=null;
+const clockNow=()=>testNow?new Date(testNow.getTime()):new Date();
+const countdownNodes={days:document.getElementById('cd-days'),hours:document.getElementById('cd-hours'),minutes:document.getElementById('cd-minutes'),seconds:document.getElementById('cd-seconds')};
+const pad2=n=>String(n).padStart(2,'0');
+function updateCountdown(now=clockNow()){
+ const target=new Date(now.getFullYear()+1,0,1,0,0,0,0);
+ const totalSeconds=Math.floor(Math.max(0,target.getTime()-now.getTime())/1000);
+ countdownNodes.days.textContent=String(Math.floor(totalSeconds/86400)).padStart(3,'0');
+ countdownNodes.hours.textContent=pad2(Math.floor(totalSeconds%86400/3600));
+ countdownNodes.minutes.textContent=pad2(Math.floor(totalSeconds%3600/60));
+ countdownNodes.seconds.textContent=pad2(totalSeconds%60);
+}
+function localDateKey(date){return `${date.getFullYear()}-${pad2(date.getMonth()+1)}-${pad2(date.getDate())}`}
+function secondsAfterMidnight(date){return date.getHours()*3600+date.getMinutes()*60+date.getSeconds()+date.getMilliseconds()/1000}
+
+const FIREWORKS_STORAGE_KEY='aeryx-christmas-last-fireworks-date';
+let memoryLastLaunchDate=null;
+function readLastLaunchDate(){
+ try{const saved=window.localStorage.getItem(FIREWORKS_STORAGE_KEY);if(saved)return saved}catch(_){}
+ try{const sessionSaved=window.sessionStorage.getItem(FIREWORKS_STORAGE_KEY);if(sessionSaved)return sessionSaved}catch(_){}
+ return memoryLastLaunchDate;
+}
+function saveLastLaunchDate(dateKey){
+ memoryLastLaunchDate=dateKey;
+ try{window.localStorage.setItem(FIREWORKS_STORAGE_KEY,dateKey);return}catch(_){}
+ try{window.sessionStorage.setItem(FIREWORKS_STORAGE_KEY,dateKey)}catch(_){/* all browser storage is optional */}
+}
+
+const fireworksCanvas=document.getElementById('fireworks-canvas');
+const fwCtx=fireworksCanvas.getContext('2d',{alpha:true});
+let fwWidth=0,fwHeight=0,fwDpr=1,fwParticles=[],fwRunning=false,fwRaf=0,fwStart=0,fwLastFrame=0;
+let fwBurstIndex=0,fwLaunchCount=0;
+const FIREWORKS_DURATION=12500;
+const FIREWORKS_COLORS=['#ffd166','#ff4d5a','#53df86','#55a7ff','#bd78ff','#ff9b55'];
+const glowSprites=Object.create(null);
+function getGlowSprite(color){
+ if(glowSprites[color])return glowSprites[color];
+ const match=/^#([0-9a-f]{6})$/i.exec(color),hex=match?match[1]:'fff0bd';
+ const r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);
+ const sprite=document.createElement('canvas');sprite.width=sprite.height=40;
+ const c=sprite.getContext('2d'),gradient=c.createRadialGradient(20,20,0,20,20,20);
+ gradient.addColorStop(0,`rgba(${r},${g},${b},.68)`);gradient.addColorStop(.24,`rgba(${r},${g},${b},.30)`);gradient.addColorStop(1,`rgba(${r},${g},${b},0)`);
+ c.fillStyle=gradient;c.fillRect(0,0,40,40);return glowSprites[color]=sprite;
+}
+function resizeFireworks(){
+ fwDpr=Math.min(window.devicePixelRatio||1,1.75);fwWidth=window.innerWidth;fwHeight=window.innerHeight;
+ fireworksCanvas.width=Math.max(1,Math.round(fwWidth*fwDpr));fireworksCanvas.height=Math.max(1,Math.round(fwHeight*fwDpr));
+ fireworksCanvas.style.width=fwWidth+'px';fireworksCanvas.style.height=fwHeight+'px';fwCtx.setTransform(fwDpr,0,0,fwDpr,0,0);
+}
+function makeBurst(x,y,index){
+ const mobile=fwWidth<600,count=Math.round((mobile?48:76)*(.82+Math.random()*.32));
+ const color=FIREWORKS_COLORS[index%FIREWORKS_COLORS.length];
+ const shape=index%4,speedBase=(mobile?2:2.55)*(.82+Math.random()*.35);
+ for(let i=0;i<count;i++){
+  const a=(shape===0||shape===3)?Math.random()*Math.PI*2:Math.PI*2*i/count+(Math.random()-.5)*.11;let speed=speedBase*(.42+Math.random()*.94);
+  if(shape===1)speed=speedBase*(.91+Math.random()*.12);
+  if(shape===2)speed=speedBase*(i%3===0?1.18:.57+Math.random()*.28);
+  if(shape===3)speed=speedBase*(.62+Math.random()*.66);
+  const life=Math.round(54+Math.random()*48),particleColor=Math.random()<.13?'#fff5cf':color;
+  fwParticles.push({x,y,px:x,py:y,vx:Math.cos(a)*speed,vy:Math.sin(a)*speed,gravity:.026+Math.random()*.027,drag:.982+Math.random()*.009,life,maxLife:life,size:.8+Math.random()*(mobile?1.25:1.75),color:particleColor,glow:getGlowSprite(particleColor),spark:Math.random()<.30});
+ }
+ if(index%3===0)for(let i=0;i<12;i++){
+  const a=Math.random()*Math.PI*2,s=speedBase*(.35+Math.random()*.38),life=38+Math.floor(Math.random()*24);
+  fwParticles.push({x,y,px:x,py:y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,gravity:.04,drag:.975,life,maxLife:life,size:.65+Math.random()*.8,color:'#fff0bd',glow:getGlowSprite('#fff0bd'),spark:true});
+ }
+}
+const BURST_TIMES=[480,1120,1880,2670,3480,4350,5250,6150,7080,8000,8900,9800,10700];
+function drawFireworksFrame(now){
+ if(!fwRunning)return;
+ const elapsedMs=now-fwStart;if(elapsedMs>=FIREWORKS_DURATION){stopFireworks();return}
+ if(now-fwLastFrame<1000/40){fwRaf=requestAnimationFrame(drawFireworksFrame);return}fwLastFrame=now;
+ while(fwBurstIndex<BURST_TIMES.length&&elapsedMs>=BURST_TIMES[fwBurstIndex]){
+  const i=fwBurstIndex++;makeBurst(fwWidth*(.16+Math.random()*.68),fwHeight*(.13+Math.random()*.43),i);
+ }
+ fwCtx.clearRect(0,0,fwWidth,fwHeight);fwCtx.globalCompositeOperation='lighter';
+ for(let i=fwParticles.length-1;i>=0;i--){
+  const p=fwParticles[i];p.px=p.x;p.py=p.y;p.vx*=p.drag;p.vy=p.vy*p.drag+p.gravity;p.x+=p.vx;p.y+=p.vy;p.life--;
+  if(p.life<=0){fwParticles.splice(i,1);continue}
+  const alpha=p.life/p.maxLife;fwCtx.lineWidth=p.spark?.8:1.15;
+  fwCtx.globalAlpha=alpha*.40;fwCtx.drawImage(p.glow,p.x-10,p.y-10,20,20);
+  fwCtx.globalAlpha=alpha*.82;fwCtx.strokeStyle=p.color;fwCtx.beginPath();fwCtx.moveTo(p.px,p.py);fwCtx.lineTo(p.x,p.y);fwCtx.stroke();
+  fwCtx.globalAlpha=alpha;fwCtx.fillStyle=p.color;fwCtx.beginPath();fwCtx.arc(p.x,p.y,p.size*(.55+alpha*.45),0,Math.PI*2);fwCtx.fill();
+ }
+ fwCtx.globalAlpha=1;fwCtx.globalCompositeOperation='source-over';fwRaf=requestAnimationFrame(drawFireworksFrame);
+}
+function startFireworks(){if(fwRunning)return;fwRunning=true;fwLaunchCount++;fwStart=performance.now();fwLastFrame=0;fwBurstIndex=0;fwParticles.length=0;fwRaf=requestAnimationFrame(drawFireworksFrame)}
+function stopFireworks(){fwRunning=false;if(fwRaf)cancelAnimationFrame(fwRaf);fwRaf=0;fwParticles.length=0;fwCtx.clearRect(0,0,fwWidth,fwHeight);fwCtx.globalAlpha=1;fwCtx.globalCompositeOperation='source-over'}
+window.addEventListener('resize',resizeFireworks,{passive:true});resizeFireworks();
+
+let pendingFireworksDate=null,fireworksWaitStartedAt=null;
+let midnightTimer=0,scheduledMidnightAt=0,scheduledMidnightDate=null;
+function scheduleNextMidnight(){
+ if(testMode)return;
+ if(midnightTimer)clearTimeout(midnightTimer);
+ const realNow=new Date(),nextMidnight=new Date(realNow.getFullYear(),realNow.getMonth(),realNow.getDate()+1,0,0,0,0);
+ scheduledMidnightAt=nextMidnight.getTime();scheduledMidnightDate=localDateKey(nextMidnight);
+ // The timeout is a second wake-up path; the callback still verifies the
+ // actual local clock and calendar date before arming the daily show.
+ midnightTimer=setTimeout(()=>{midnightTimer=0;checkClockAndSchedule();if(!midnightTimer)scheduleNextMidnight()},Math.max(0,scheduledMidnightAt-realNow.getTime())+80);
+}
+function processScheduledMidnight(now){
+ if(!scheduledMidnightAt||now.getTime()<scheduledMidnightAt)return;
+ const scheduledDate=scheduledMidnightDate;scheduledMidnightAt=0;scheduledMidnightDate=null;
+ // If a background-tab timer was throttled, the pre-midnight schedule proves
+ // that this page was already open. Do not lose that midnight crossing merely
+ // because the browser delivered the callback a little after 00:05.
+ if(localDateKey(now)===scheduledDate&&readLastLaunchDate()!==scheduledDate&&pendingFireworksDate!==scheduledDate){
+  pendingFireworksDate=scheduledDate;fireworksWaitStartedAt=null;
+ }
+ scheduleNextMidnight();
+}
+function checkClockAndSchedule(){
+ const now=clockNow(),today=localDateKey(now);updateCountdown(now);
+ if(!testMode)processScheduledMidnight(now);
+ if(pendingFireworksDate&&pendingFireworksDate!==today){pendingFireworksDate=null;fireworksWaitStartedAt=null}
+ const alreadyLaunched=readLastLaunchDate()===today;
+ // A visit at any point in 00:00:00..00:04:59 arms today's show. The tree
+ // build and its 2-second pause may finish after 00:05:00 without cancelling it.
+ if(!alreadyLaunched&&pendingFireworksDate!==today&&secondsAfterMidnight(now)<300){pendingFireworksDate=today;fireworksWaitStartedAt=null}
+ if(pendingFireworksDate===today){
+  if(readLastLaunchDate()===today){pendingFireworksDate=null;fireworksWaitStartedAt=null;return}
+  if(elapsed>=TREE_BUILD_DURATION){
+   if(fireworksWaitStartedAt===null)fireworksWaitStartedAt=performance.now();
+   if(performance.now()-fireworksWaitStartedAt>=2000){
+    const launchNow=clockNow(),launchDate=localDateKey(launchNow);
+    if(launchDate===pendingFireworksDate&&readLastLaunchDate()!==launchDate){saveLastLaunchDate(launchDate);pendingFireworksDate=null;fireworksWaitStartedAt=null;startFireworks()}
+    else if(launchDate!==pendingFireworksDate){pendingFireworksDate=null;fireworksWaitStartedAt=null}
+   }
+  }else fireworksWaitStartedAt=null;
+ }
+}
+// Check the device clock repeatedly and whenever a background tab resumes.
+checkClockAndSchedule();
+if(!testMode)scheduleNextMidnight();
+const clockPoll=setInterval(checkClockAndSchedule,500);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkClockAndSchedule()});
+window.addEventListener('focus',checkClockAndSchedule,{passive:true});
+window.addEventListener('pageshow',checkClockAndSchedule,{passive:true});
+
+if(testMode){
+ window.__AERYX_TEST__={
+  setNow(value){const next=value instanceof Date?new Date(value.getTime()):new Date(value);if(Number.isNaN(next.getTime()))throw new TypeError('Invalid test date');testNow=next;checkClockAndSchedule()},
+  forceTreeBuilt(){elapsed=TREE_BUILD_DURATION+.1;checkClockAndSchedule()},
+  setWaitElapsed(ms){if(fireworksWaitStartedAt===null)fireworksWaitStartedAt=performance.now();fireworksWaitStartedAt=performance.now()-Math.max(0,ms);checkClockAndSchedule()},
+  resetDay(){pendingFireworksDate=null;fireworksWaitStartedAt=null;memoryLastLaunchDate=null;scheduledMidnightAt=0;scheduledMidnightDate=null;try{localStorage.removeItem(FIREWORKS_STORAGE_KEY)}catch(_){};try{sessionStorage.removeItem(FIREWORKS_STORAGE_KEY)}catch(_){};stopFireworks()},
+  simulateMidnightWake(dateKey){const midnight=new Date(`${dateKey}T00:00:00`);scheduledMidnightAt=midnight.getTime();scheduledMidnightDate=dateKey;processScheduledMidnight(clockNow());checkClockAndSchedule()},
+  finishFireworks(){if(fwRunning)drawFireworksFrame(fwStart+FIREWORKS_DURATION+1)},
+  state(){const n=clockNow();return {date:localDateKey(n),secondsAfterMidnight:secondsAfterMidnight(n),treeBuilt:elapsed>=TREE_BUILD_DURATION,pendingDate:pendingFireworksDate,lastLaunchDate:readLastLaunchDate(),waitElapsed:fireworksWaitStartedAt===null?null:performance.now()-fireworksWaitStartedAt,fireworksRunning:fwRunning,fireworksParticles:fwParticles.length,launchCount:fwLaunchCount,countdown:{days:countdownNodes.days.textContent,hours:countdownNodes.hours.textContent,minutes:countdownNodes.minutes.textContent,seconds:countdownNodes.seconds.textContent}}},
+  stopFireworks
+ };
+}
+
 })();
 </script></body></html>
