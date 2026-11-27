@@ -7,20 +7,29 @@
 *{box-sizing:border-box}
 html,body{width:100%;height:100%;margin:0;background:#02070b;color:#c7d2d0;font-family:Consolas,"Courier New",monospace;overflow:hidden}
 body{position:relative;background:
- radial-gradient(ellipse at 50% 48%,rgba(28,78,54,.22) 0%,rgba(12,35,34,.16) 28%,transparent 62%),
- radial-gradient(ellipse at 16% 78%,rgba(115,50,37,.13),transparent 33%),
- radial-gradient(ellipse at 86% 22%,rgba(36,66,106,.15),transparent 36%),
- linear-gradient(155deg,#07131a 0%,#06100f 42%,#100d16 100%)}
-body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.62;background-image:
- radial-gradient(1px 1px at 7% 13%,rgba(238,246,236,.9) 50%,transparent 100%),
- radial-gradient(1px 1px at 18% 42%,rgba(238,246,236,.65) 50%,transparent 100%),
- radial-gradient(1.5px 1.5px at 31% 9%,rgba(255,220,150,.75) 50%,transparent 100%),
- radial-gradient(1px 1px at 43% 27%,rgba(238,246,236,.55) 50%,transparent 100%),
- radial-gradient(1px 1px at 57% 12%,rgba(238,246,236,.75) 50%,transparent 100%),
- radial-gradient(1.5px 1.5px at 69% 37%,rgba(255,220,150,.65) 50%,transparent 100%),
- radial-gradient(1px 1px at 81% 16%,rgba(238,246,236,.7) 50%,transparent 100%),
- radial-gradient(1px 1px at 93% 54%,rgba(238,246,236,.55) 50%,transparent 100%),
- radial-gradient(1px 1px at 12% 83%,rgba(238,246,236,.5) 50%,transparent 100%),
+ radial-gradient(ellipse at 50% 58%,rgba(28,92,60,.23) 0%,rgba(12,35,43,.18) 30%,transparent 62%),
+ radial-gradient(ellipse at 8% 82%,rgba(152,74,45,.15),transparent 29%),
+ radial-gradient(ellipse at 92% 18%,rgba(45,86,142,.20),transparent 34%),
+ radial-gradient(ellipse at 50% 0%,rgba(39,77,105,.24),transparent 48%),
+ linear-gradient(155deg,#081a2b 0%,#071a1a 42%,#140f23 100%)}
+body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.72;background-image:
+ radial-gradient(1px 1px at 4% 12%,rgba(238,246,236,.9) 50%,transparent 100%),
+ radial-gradient(1px 1px at 8% 42%,rgba(238,246,236,.65) 50%,transparent 100%),
+ radial-gradient(1.5px 1.5px at 13% 21%,rgba(255,220,150,.75) 50%,transparent 100%),
+ radial-gradient(1px 1px at 18% 72%,rgba(238,246,236,.75) 50%,transparent 100%),
+ radial-gradient(1px 1px at 23% 34%,rgba(238,246,236,.55) 50%,transparent 100%),
+ radial-gradient(1.5px 1.5px at 28% 8%,rgba(255,220,150,.75) 50%,transparent 100%),
+ radial-gradient(1px 1px at 36% 19%,rgba(238,246,236,.65) 50%,transparent 100%),
+ radial-gradient(1px 1px at 42% 60%,rgba(238,246,236,.55) 50%,transparent 100%),
+ radial-gradient(1.5px 1.5px at 48% 13%,rgba(255,220,150,.65) 50%,transparent 100%),
+ radial-gradient(1px 1px at 54% 37%,rgba(238,246,236,.75) 50%,transparent 100%),
+ radial-gradient(1px 1px at 61% 8%,rgba(238,246,236,.7) 50%,transparent 100%),
+ radial-gradient(1.5px 1.5px at 67% 67%,rgba(255,220,150,.6) 50%,transparent 100%),
+ radial-gradient(1px 1px at 73% 26%,rgba(238,246,236,.75) 50%,transparent 100%),
+ radial-gradient(1px 1px at 80% 47%,rgba(238,246,236,.6) 50%,transparent 100%),
+ radial-gradient(1.5px 1.5px at 87% 14%,rgba(255,220,150,.75) 50%,transparent 100%),
+ radial-gradient(1px 1px at 94% 58%,rgba(238,246,236,.65) 50%,transparent 100%),
+ radial-gradient(1px 1px at 12% 91%,rgba(238,246,236,.5) 50%,transparent 100%),
  radial-gradient(1.5px 1.5px at 76% 88%,rgba(255,220,150,.55) 50%,transparent 100%)}
 body:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 36%,rgba(0,0,0,.42) 100%)}
 main{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;width:100vw;height:100svh;min-height:100svh;margin:0;padding:0;overflow:hidden;background:transparent}
@@ -45,11 +54,46 @@ main{position:relative;z-index:1;display:flex;align-items:center;justify-content
 .b-blue{fill:#73c9ff;filter:drop-shadow(0 0 5px rgba(95,180,255,.9));animation-delay:1.9s}
 @keyframes bulb-pulse{from{opacity:.55}to{opacity:1}}
 .ambient-glow{position:fixed;inset:auto 0 0;height:32vh;z-index:0;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(36,105,66,.15),transparent 70%)}
-@media(max-width:520px){.hud{font-size:9px;left:8px;right:8px;bottom:7px}.credit{font-size:10px;letter-spacing:.1em}}
+
+.aurora{position:fixed;z-index:0;pointer-events:none;left:-18vw;top:-22vh;width:136vw;height:72vh;opacity:.45;filter:blur(44px);mix-blend-mode:screen;transform:rotate(-7deg);background:
+ radial-gradient(ellipse at 22% 64%,rgba(23,192,132,.34),transparent 35%),
+ radial-gradient(ellipse at 55% 40%,rgba(41,174,151,.27),transparent 40%),
+ radial-gradient(ellipse at 79% 57%,rgba(68,115,223,.29),transparent 37%);animation:aurora-drift 19s ease-in-out infinite alternate}
+.aurora:before{content:"";position:absolute;inset:12% 4%;background:linear-gradient(112deg,transparent 9%,rgba(75,220,157,.20) 23%,rgba(84,181,222,.27) 37%,rgba(116,91,211,.20) 51%,transparent 73%);filter:blur(31px);transform:skewY(-12deg);animation:aurora-wave 14s ease-in-out infinite alternate}
+.aurora:after{content:"";position:absolute;left:8%;right:12%;top:32%;height:28%;background:linear-gradient(180deg,transparent,rgba(83,226,164,.09),rgba(104,195,231,.12),transparent);clip-path:polygon(0 30%,18% 0,43% 22%,69% 3%,100% 31%,91% 76%,62% 100%,34% 72%,10% 100%);filter:blur(22px);transform:rotate(-8deg);animation:aurora-wave 17s ease-in-out infinite alternate-reverse}
+@keyframes aurora-drift{from{transform:translate3d(-2%,0,0) rotate(-8deg) scale(1)}to{transform:translate3d(3%,4%,0) rotate(-3deg) scale(1.08)}}
+body:before{animation:star-shimmer 11s ease-in-out infinite alternate}
+@keyframes star-shimmer{from{opacity:.48}to{opacity:.82}}
+@keyframes aurora-wave{from{opacity:.35;transform:translateX(-3%) skewY(-12deg)}to{opacity:.9;transform:translateX(4%) skewY(-5deg)}}
+.moon-halo{position:fixed;z-index:0;pointer-events:none;top:10%;right:13%;width:clamp(72px,9vw,132px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,rgba(233,244,222,.16),rgba(174,217,222,.09) 39%,transparent 72%)}
+.moon{position:absolute;inset:28%;border-radius:50%;background:radial-gradient(circle at 34% 30%,#fff9e6 0%,#e6edda 43%,#c2d1c5 72%,#93a9ae 100%);box-shadow:0 0 22px rgba(219,240,217,.34),0 0 65px rgba(173,220,215,.19);opacity:.88;overflow:hidden}
+.moon:before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 28% 42%,rgba(132,151,145,.20) 0 7%,transparent 8%),radial-gradient(circle at 63% 28%,rgba(132,151,145,.16) 0 5%,transparent 6%),radial-gradient(circle at 65% 67%,rgba(132,151,145,.17) 0 9%,transparent 10%),radial-gradient(circle at 39% 76%,rgba(132,151,145,.13) 0 4%,transparent 5%);opacity:.7}
+.moon:after{content:"";position:absolute;inset:0;border-radius:50%;background:linear-gradient(125deg,rgba(255,255,255,.24),transparent 52%,rgba(50,76,80,.12))}
+.winter-horizon{position:fixed;z-index:0;pointer-events:none;left:0;right:0;bottom:-1px;height:29vh;min-height:145px;opacity:.82}
+.winter-horizon svg{width:100%;height:100%;display:block}
+.ridge-back{fill:#0a1a25;opacity:.78}.ridge-front{fill:#0b2025;opacity:.9}
+.pine{fill:#07151b;opacity:.9}
+.scene:before{inset:-1%;background:
+ radial-gradient(ellipse at 50% 53%,rgba(33,143,80,.30),rgba(20,80,61,.16) 39%,transparent 72%),
+ radial-gradient(ellipse at 50% 86%,rgba(255,196,104,.19),transparent 40%),
+ radial-gradient(ellipse at 50% 100%,rgba(204,231,236,.18),transparent 54%);filter:blur(27px)}
+.scene:after{left:4%;right:4%;bottom:1%;height:25%;background:radial-gradient(ellipse,rgba(209,235,240,.15),rgba(120,176,168,.05) 42%,transparent 72%);filter:blur(20px)}
+#render{filter:drop-shadow(0 0 3px rgba(62,222,128,.18)) drop-shadow(0 0 12px rgba(26,158,92,.10))}
+
+@media(max-width:520px){.hud{font-size:9px;left:8px;right:8px;bottom:7px}.credit{font-size:10px;letter-spacing:.1em}.moon-halo{top:12%;right:7%;width:70px}.winter-horizon{height:20vh;min-height:100px}.aurora{top:-12vh;height:52vh;opacity:.34}.fairy-lights .side-wire{opacity:.45}}
 @media(prefers-reduced-motion:reduce){.credit{text-shadow:none}.bulb{animation:none}}
 </style></head>
 <body>
 <canvas id="page-snow" aria-hidden="true"></canvas>
+<div class="aurora" aria-hidden="true"></div>
+<div class="moon-halo" aria-hidden="true"><div class="moon"></div></div>
+<div class="winter-horizon" aria-hidden="true">
+ <svg viewBox="0 0 1600 300" preserveAspectRatio="none">
+  <path class="ridge ridge-back" d="M0 250 L75 185 125 228 210 145 288 228 365 162 438 242 525 150 610 230 690 171 770 238 850 149 930 227 1020 158 1105 236 1190 151 1270 224 1360 165 1450 230 1520 176 1600 226 L1600 300 L0 300Z"/>
+  <path class="ridge ridge-front" d="M0 272 L68 222 115 264 190 190 258 260 332 210 410 270 490 196 566 263 650 211 735 270 820 192 895 258 980 205 1060 271 1145 198 1225 264 1310 210 1395 269 1480 207 1540 257 1600 218 L1600 300 L0 300Z"/>
+  <g class="pine pine-a"><path d="M0 300 L0 245 22 266 10 263 31 230 20 237 42 195 64 237 53 230 73 264 61 260 83 288 83 300Z"/><path d="M132 300 L132 255 148 270 139 267 157 235 149 240 169 201 189 240 180 235 198 270 187 267 205 290 205 300Z"/><path d="M330 300 L330 253 348 269 337 264 360 224 351 231 374 181 398 231 387 224 408 267 397 263 420 292 420 300Z"/><path d="M605 300 L605 263 620 274 613 269 630 240 623 246 642 205 661 246 653 240 672 274 663 270 680 293 680 300Z"/><path d="M910 300 L910 252 930 270 919 264 943 220 932 229 956 174 982 229 970 220 993 267 982 263 1005 293 1005 300Z"/><path d="M1210 300 L1210 258 1226 272 1218 268 1236 234 1228 240 1248 193 1269 240 1260 234 1280 270 1270 266 1290 292 1290 300Z"/><path d="M1450 300 L1450 248 1468 265 1458 260 1480 218 1471 225 1494 174 1517 225 1507 218 1528 263 1518 259 1540 292 1540 300Z"/></g>
+ </svg>
+</div>
 <svg class="fairy-lights" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
   <defs>
     <filter id="bulb-glow" x="-250%" y="-250%" width="600%" height="600%">
@@ -76,7 +120,7 @@ main{position:relative;z-index:1;display:flex;align-items:center;justify-content
 <div class="ambient-glow" aria-hidden="true"></div>
 <main>
   <section class="scene">
-    <canvas id="render" width="805" height="805"></canvas>
+    <canvas id="render" width="1610" height="1610"></canvas>
     <div class="hud"><span>ASCII CHRISTMAS</span><span id="fps">30 FPS · 3D ASCII</span></div>
   </section>
 </main>
@@ -84,24 +128,24 @@ main{position:relative;z-index:1;display:flex;align-items:center;justify-content
 <script>
 (()=>{
 'use strict';
-const W=805,H=805,CW=5,CH=7,COLS=W/CW,ROWS=H/CH,CAM=9,FOCAL=2250*805/900,TILT=.22;
+const SCALE=2,W=1610,H=1610,MOBILE=window.matchMedia('(max-width: 560px)').matches,CW=MOBILE?20:10,CH=MOBILE?28:14,COLS=Math.floor(W/CW),ROWS=Math.floor(H/CH),CAM=9,FOCAL=2250*805/900*SCALE,TILT=.22,ZOOM=1.0,FRAME_Y=-55;
 const BASE=-1.2,TREE_H=2.5,TREE_R=1.15,TIERS=5;
 const C={gold:[255,205,70],red:[230,45,50],green:[30,155,48],wood:[110,70,40]};
 const BAUBLES=[C.red,C.gold,[70,130,255],[255,125,190],[255,150,40],[170,90,230]];
-const glyphRows={
-'0':['.###.','#...#','#..##','#.#.#','##..#','#...#','.###.'],
-'1':['..#..','.##..','..#..','..#..','..#..','..#..','.###.'],
-'#':['.#.#.','.#.#.','#####','.#.#.','#####','.#.#.','.#.#.'],
-'$':['..#..','.####','#.#..','.###.','..#.#','####.','..#..'],
-'%':['##..#','##..#','...#.','..#..','.#...','#..##','#..##'],
-'&':['.##..','#..#.','#.#..','.#...','#.#.#','#..#.','.##.#'],
-'*':['.....','#.#.#','.###.','#####','.###.','#.#.#','.....'],
-'+':['.....','..#..','..#..','#####','..#..','..#..','.....'],
-'=':['.....','.....','#####','.....','#####','.....','.....'],
-'@':['.###.','#...#','#.###','#.#.#','#.###','#....','.###.']
-};
-const glyphNames='01#$%&*+=@';
-const glyphs=glyphNames.split('').map(ch=>glyphRows[ch].map(row=>Array.from(row,c=>c==='#'?1:0)));
+const glyphChars='01#$%&*+=@';
+const glyphMaskCanvas=document.createElement('canvas');
+glyphMaskCanvas.width=CW;glyphMaskCanvas.height=CH;
+const glyphMaskCtx=glyphMaskCanvas.getContext('2d',{willReadFrequently:true});
+glyphMaskCtx.font=`bold ${MOBILE?22:12}px "DejaVu Sans Mono", Consolas, "Courier New", monospace`;
+glyphMaskCtx.textAlign='center';glyphMaskCtx.textBaseline='middle';glyphMaskCtx.fillStyle='#fff';
+const glyphs=glyphChars.split('').map(char=>{
+  glyphMaskCtx.clearRect(0,0,CW,CH);
+  glyphMaskCtx.fillText(char,CW/2,CH/2+(MOBILE?1:.5));
+  const rgba=glyphMaskCtx.getImageData(0,0,CW,CH).data;
+  const alpha=new Uint8Array(CW*CH);
+  for(let i=0;i<alpha.length;i++)alpha[i]=rgba[i*4+3];
+  return alpha;
+});
 const canvas=document.getElementById('render'),ctx=canvas.getContext('2d',{alpha:true});
 const image=ctx.createImageData(W,H),pix=image.data;
 let seed=7;function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296}
@@ -114,7 +158,7 @@ function add(x,y,z,col,t){P.push(x,y,z);COL.push(col[0],col[1],col[2]);T.push(t)
 function sphere(cx,cy,cz,r,n,col,t){for(let i=0;i<n;i++){let x=rand(-1,1),y=rand(-1,1),z=rand(-1,1),l=Math.hypot(x,y,z)||1;add(cx+x/l*r,cy+y/l*r,cz+z/l*r,col,t)}}
 function buildScene(){
  // snowy ground disc, same point-cloud construction as source
- for(let i=0;i<34000;i++){const r=1.8*Math.sqrt(rnd()),a=rnd()*Math.PI*2,shade=190+rnd()*60;add(r*Math.cos(a),BASE-.02,r*Math.sin(a),[shade*.85,shade*.93,shade],r*.35)}
+ for(let i=0;i<34000;i++){const r=1.5*Math.sqrt(rnd()),a=rnd()*Math.PI*2,shade=190+rnd()*60;add(r*Math.cos(a),BASE-.02,r*Math.sin(a),[shade*.85,shade*.93,shade],r*.35)}
  for(let i=0;i<120;i++){const a=rnd()*Math.PI*2;add(.13*Math.cos(a),BASE+rnd()*.3,.13*Math.sin(a),C.wood,.2)}
  for(let i=0;i<22000;i++){const h=rnd()**.85,a=rnd()*Math.PI*2,r=treeRadius(h)*(1-rnd()**3*.85),k=rnd();add(r*Math.cos(a),BASE+h*TREE_H,r*Math.sin(a),[15+35*k,105+125*k,25+40*k],.4+h*2.8+rnd()*.25)}
  // red garland spiral
@@ -148,13 +192,15 @@ function buildScene(){
 buildScene();
 const N=T.length;
 const cellDepth=new Float32Array(COLS*ROWS),cellIndex=new Int32Array(COLS*ROWS),cellRGB=new Uint8Array(COLS*ROWS*3);
-function project(x,y,z,angle){const c=Math.cos(angle),s=Math.sin(angle),rx=x*c+z*s,rz=-x*s+z*c,ct=Math.cos(TILT),st=Math.sin(TILT),yy=y*ct-rz*st,zz=y*st+rz*ct,k=FOCAL/(CAM-zz);return [W/2+rx*k,H/2-yy*k,zz]}
+function project(x,y,z,angle){const c=Math.cos(angle),s=Math.sin(angle),rx=x*c+z*s,rz=-x*s+z*c,ct=Math.cos(TILT),st=Math.sin(TILT),yy=y*ct-rz*st,zz=y*st+rz*ct,k=FOCAL*ZOOM/(CAM-zz);return [W/2+rx*k,H/2-yy*k+FRAME_Y,zz]}
 function putGlyph(cell,idx){
- const gx=cell%COLS,gy=(cell/COLS)|0,gi=idx%10,mask=glyphs[gi],offX=gx*CW,offY=gy*CH,base=cell*3;
+ const gx=cell%COLS,gy=(cell/COLS)|0,gi=idx%glyphs.length,mask=glyphs[gi],offX=gx*CW,offY=gy*CH,base=cell*3;
  const r=cellRGB[base],g=cellRGB[base+1],b=cellRGB[base+2];
  for(let yy=0;yy<CH;yy++)for(let xx=0;xx<CW;xx++){
-  const on=mask[yy][xx],mul=on?1:.38,pi=((offY+yy)*W+offX+xx)*4;
-  pix[pi]=r;pix[pi+1]=g;pix[pi+2]=b;pix[pi+3]=on?255:0;
+  const coverage=mask[yy*CW+xx];
+  if(!coverage)continue;
+  const pi=((offY+yy)*W+offX+xx)*4;
+  pix[pi]=r;pix[pi+1]=g;pix[pi+2]=b;pix[pi+3]=coverage;
  }
 }
 let elapsed=0,angle=0,paused=false,last=performance.now(),lastRender=0;
