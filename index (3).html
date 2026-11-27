@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASCII Christmas Tree 2027 — Aeryx Project</title>
+<style>
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background-color: #07090e;
+    color: #d8dee9;
+    font-family: 'Consolas', 'Menlo', 'DejaVu Sans Mono', 'Courier New', monospace;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    user-select: none;
+  }
+  .terminal {
+    width: 100%;
+    max-width: 720px;
+    height: 100vh;
+    max-height: 980px;
+    background-color: #090c12;
+    border: 1px solid #18202c;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.95);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .viewport {
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 280px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at 50% 45%, #0e131d 0%, #080a0f 100%);
+    overflow: hidden;
+  }
+  canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+  }
+  .hud-brand {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    color: #88c0d0;
+    text-shadow: 0 0 8px rgba(136, 192, 208, 0.35);
+    pointer-events: none;
+  }
+  .hud-brand span {
+    color: #4c566a;
+    margin: 0 5px;
+  }
+  .hud-time {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 12px;
+    color: #ebcb8b;
+    pointer-events: none;
+  }
+  .hud-stats {
+    position: absolute;
+    bottom: 10px;
+    left: 16px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: #616e88;
+    pointer-events: none;
+  }
+  .hud-stats b {
+    color: #81a1c1;
+    font-weight: normal;
+  }
+  .status-bar {
+    flex: 0 0 26px;
+    background-color: #0e131c;
+    border-top: 1px solid #1b2432;
+    border-bottom: 1px solid #1b2432;
+    padding: 0 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11.5px;
+  }
+  .status-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #88c0d0;
+  }
+  .status-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #616e88;
+  }
+  .dot-live {
+    color: #a3be8c;
+  }
+  .code-panel {
+    flex: 0 0 auto;
+    height: 190px;
+    background-color: #07090d;
+    padding: 8px 14px;
+    overflow: hidden;
+    font-size: 11px;
+    line-height: 1.42;
+    transition: height 0.28s ease-out;
+  }
+  .code-line {
+    display: flex;
+    white-space: pre;
+  }
+  .ln {
+    width: 36px;
+    flex-shrink: 0;
+    color: #434c5e;
+    text-align: right;
+    padding-right: 12px;
+  }
+  .src {
+    color: #abb2bf;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .kw { color: #c678dd; }
+  .fn { color: #61afef; }
+  .str { color: #98c379; }
+  .num { color: #d19a66; }
+  .cm { color: #5c6370; font-style: italic; }
+</style>
+</head>
+<body>
+
+<div class="terminal">
+  <div class="viewport" id="viewport">
+    <canvas id="treeCanvas"></canvas>
+    <div class="hud-brand">Aeryx Project<span>|</span>AeryxVPN</div>
+    <div class="hud-time" id="hudTime">t 00.00s</div>
+    <div class="hud-stats">
+      <div>@aeryx.ascii</div>
+      <div>rotation <b id="hudRot">000.0°</b></div>
+      <div>letters <b id="hudLetters">0</b></div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-left">
+      <span>🐍</span>
+      <span>christmas_tree.py</span>
+    </div>
+    <div class="status-right">
+      <span><span class="dot-live">●</span> running · <span id="hudFps">60</span> fps</span>
+      <span>[Space] pause · [R] restart</span>
+    </div>
+  </div>
+
+  <div class="code-panel" id="codePanel"></div>
+</div>
+
+<script>
+const PYTHON_SOURCE = [
+  "def grow_time(y):",
+  "    return T_GROW[0] + (T_GROW[1] - T_GROW[0]) * np.clip((y - GROUND) / (Y1 - GROUND), 0, 1)",
+  "",
+  "def build():",
+  "    rng = np.random.default_rng(2027)",
+  "    q = Parts()",
+  "    tips = []",
+  "",
+  "    # needles: whorls of drooping branches, denser and longer at the bottom",
+  "    for i, y in enumerate(np.linspace(Y0 + 0.02, Y1 - 0.06, 28)):",
+  "        u = (y - Y0) / (Y1 - Y0)",
+  "        R = envelope(y) + 0.055",
+  "        nb = int(8 + 14 * (1 - u))",
+  "        for b in range(nb):",
+  "            a = TAU * (b + 0.5 * rng.random()) / nb + i * 0.77",
+  "            L = R * rng.uniform(0.86, 1.02)",
+  "            n = int(32 + 210 * L)",
+  "            s = rng.random(n) ** 0.85",
+  "            d = np.array([np.cos(a), 0, np.sin(a)])",
+  "            side = np.array([-np.sin(a), 0, np.cos(a)])",
+  "            spread = (0.028 + 0.06 * s) * rng.normal(0, 1, n)",
+  "            p = d * s[:, None] * L + side * spread[:, None]",
+  "            p[:, 1] = y + 0.07 * s**1.8 + 0.22 * u * s**2 + 0.014 * rng.normal(0, 1, n)",
+  "            snow = (s > 0.45) & (rng.random(n) < (0.34 - 0.1 * s))",
+  "            green = np.array([0.08, 0.48, 0.18]) + np.array([0.12, 0.26, 0.12]) * s[:, None]",
+  "            q.add(p, np.where(snow[:, None], WHITE, green), np.where(snow, SNOW, NEEDLE), grow_time(p[:, 1]))",
+  "            tips.append(d * L + np.array([0, y + 0.07 + 0.22 * u, 0]))",
+  "",
+  "    # dark inner cone so nothing shows through the branches",
+  "    m = 8500",
+  "    y = Y0 + (Y1 - Y0) * (rng.random(m) ** 0.75)",
+  "    phi = rng.random(m) * TAU",
+  "    r = 0.84 * envelope(y)",
+  "    q.add(np.stack([r * np.cos(phi), y, r * np.sin(phi)], 1), DARK_CONE, INNER, grow_time(y))",
+  "",
+  "    # trunk",
+  "    m = 1800",
+  "    y = phi = GROUND + rng.random(m) * (Y0 + 0.1 - GROUND)",
+  "    bark = 0.75 + 0.25 * np.sin(15 * phi)",
+  "    q.add(0.065 * np.stack([np.cos(phi), y / 0.065, np.sin(phi)], 1), TRUNK * bark[:, None], TRUNK_ID, grow_time(y))",
+  "",
+  "    # tinsel garland: a gold spiral drooping in swags between hanging points",
+  "    turns = 3.8",
+  "    u = np.linspace(0, 1, 2800)",
+  "    yg = Y0 + 0.12 + (Y1 - Y0 - 0.14) * u",
+  "    ag = TAU * turns * u + 0.9",
+  "    swag = -0.065 * np.abs(np.sin(ag * 2.5))",
+  "    rg = envelope(yg) + 0.075",
+  "    q.add(np.stack([rg * np.cos(ag), yg + swag, rg * np.sin(ag)], 1), GOLD, TINSEL, T_GARLAND)",
+  "",
+  "    # baubles: mostly red, some gold and silver",
+  "    for k in range(28):",
+  "        u = (k + rng.random()) / 28",
+  "        y = Y0 + 0.08 + u * (Y1 - Y0 - 0.16)",
+  "        R = envelope(y) + 0.04",
+  "        a = 2.39996 * k + rng.random() * 0.4",
+  "        c = np.array([R * np.cos(a), y, R * np.sin(a)])",
+  "        q.add(c + sphere(0.032), BAUBLE_COLOR[k % 3], BAUBLE, T_BAUBLES)",
+  "",
+  "    # fairy lights on the branch tips",
+  "    tips = np.array(tips)",
+  "    pick = rng.choice(len(tips), min(190, len(tips)), replace=False)",
+  "    for c in tips[pick]:",
+  "        q.add(c + sphere(0.016), LIGHT_PALETTE, LIGHT, T_LIGHTS)",
+  "",
+  "    # presents: solid 3D boxes with crossed ribbon and a bow",
+  "    gifts = [",
+  "        (-0.27, 0.15, 0.20, 0.17, 0.20, RED, GOLD),",
+  "        ( 0.25, 0.17, 0.22, 0.15, 0.18, BLUE, WHITE),",
+  "        (-0.16, -0.25, 0.18, 0.21, 0.18, GOLD, RED),",
+  "        ( 0.28, -0.16, 0.19, 0.14, 0.19, GREEN_BOX, GOLD),",
+  "        ( 0.02, 0.30, 0.16, 0.13, 0.16, PURPLE, GOLD),",
+  "        (-0.31, -0.06, 0.15, 0.15, 0.15, WHITE, RED)",
+  "    ]",
+  "    for g in gifts:",
+  "        q.add_box(*g, t0=T_GIFTS)",
+  "",
+  "    # star & banner: MERRY CHRISTMAS 2027",
+  "    MESSAGE = 'MERRY CHRISTMAS 2027'",
+  "    BRAND = 'Aeryx Project | AeryxVPN'",
+  "    return q"
+];
+
+function highlightPy(text) {
+  let esc = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  if (esc.trim().startsWith("#")) {
+    return `<span class="cm">${esc}</span>`;
+  }
+  esc = esc.replace(/('[^']*'|"[^"]*")/g, '<span class="str">$1</span>');
+  esc = esc.replace(/(def|for|in|if|return|and|or|not|None|False|True)/g, '<span class="kw">$1</span>');
+  esc = esc.replace(/([a-zA-Z_][a-zA-Z0-9_]*)(?=\()/g, '<span class="fn">$1</span>');
+  esc = esc.replace(/(\d+\.?\d*)/g, '<span class="num">$1</span>');
+  return esc;
+}
+
+const codePanel = document.getElementById("codePanel");
+let lastCodeIdx = -1;
+
+function updateCodePanel(t) {
+  const scrollSpeed = 3.4;
+  const idx = Math.floor(t * scrollSpeed) % PYTHON_SOURCE.length;
+  if (idx === lastCodeIdx) return;
+  lastCodeIdx = idx;
+
+  // Динамическая высота окна в зависимости от длины и насыщенности текущих строк кода
+  let blockWeight = 0;
+  const visibleCount = 12;
+  let html = "";
+
+  for (let i = 0; i < visibleCount; i++) {
+    const lineIdx = (idx + i) % PYTHON_SOURCE.length;
+    const raw = PYTHON_SOURCE[lineIdx];
+    const lineNum = 105 + lineIdx * 4;
+    blockWeight += Math.min(raw.length, 95);
+    html += `<div class="code-line"><span class="ln">${lineNum}</span><span class="src">${highlightPy(raw)}</span></div>`;
+  }
+
+  codePanel.innerHTML = html;
+
+  // Плавное изменение высоты контейнера от 125px (короткие строки) до 235px (длинные плотные блоки)
+  const ratio = Math.min(1, Math.max(0, (blockWeight - 240) / 560));
+  const targetHeight = Math.round(125 + ratio * 110);
+  codePanel.style.height = targetHeight + "px";
+}
+
+// --- 3D ASCII РЕНДЕРЕР ---
+const canvas = document.getElementById("treeCanvas");
+const ctx = canvas.getContext("2d");
+
+const COLS = 92;
+const ROWS = 74;
+const CHAR_W = 7.4;
+const CHAR_H = 13.0;
+
+canvas.width = Math.round(COLS * CHAR_W);
+canvas.height = Math.round(ROWS * CHAR_H);
+
+const RAMP = " .:-=+*#%@";
+const MESSAGE = "MERRY CHRISTMAS 2027";
+
+const PAL = {
+  NEEDLE_DARK: [14, 92, 42],
+  NEEDLE_MID:  [34, 168, 76],
+  NEEDLE_TIP:  [72, 214, 108],
+  INNER_DARK:  [7, 26, 15],
+  SNOW:        [226, 236, 248],
+  TRUNK:       [112, 72, 44],
+  GOLD:        [248, 206, 72],
+  RED:         [236, 64, 72],
+  BLUE:        [68, 162, 248],
+  PURPLE:      [182, 104, 242],
+  GREEN_BOX:   [46, 184, 96],
+  WHITE:       [245, 248, 255]
+};
+
+let parts = [];
+let bgStars = [];
+let t = 0;
+let paused = false;
+let lastFrame = performance.now();
+let fpsSmooth = 60;
+
+function rand(a, b) {
+  return a + Math.random() * (b - a);
+}
+
+function clamp(v, a, b) {
+  return Math.max(a, Math.min(b, v));
+}
+
+function lerpColor(c1, c2, f) {
+  return [
+    Math.round(c1[0] + (c2[0] - c1[0]) * f),
+    Math.round(c1[1] + (c2[1] - c1[1]) * f),
+    Math.round(c1[2] + (c2[2] - c1[2]) * f)
+  ];
+}
+
+function envelope(y, Y0, Y1) {
+  const u = clamp((y - Y0) / (Y1 - Y0), 0, 1);
+  return 0.03 + 0.46 * Math.pow(u, 0.84);
+}
+
+function buildScene() {
+  parts = [];
+  const Y0 = -0.82;
+  const Y1 = 0.65;
+  const GROUND = 0.80;
+
+  // 1. Внутренний плотный темный конус (чтобы задние ветки и подарки за елкой не просвечивали)
+  const coneCount = 4200;
+  for (let i = 0; i < coneCount; i++) {
+    const u = Math.pow(Math.random(), 0.72);
+    const y = Y0 + 0.04 + (Y1 - Y0 - 0.05) * u;
+    const r = envelope(y, Y0, Y1) * 0.84;
+    const phi = rand(0, Math.PI * 2);
+    parts.push({
+      x: r * Math.cos(phi),
+      y: y,
+      z: r * Math.sin(phi),
+      col: PAL.INNER_DARK,
+      t0: u * 3.2,
+      kind: "cone",
+      ch: "#"
+    });
+  }
+
+  // 2. Пышные поникшие ярусы веток со снегом
+  const whorls = 28;
+  const branchTips = [];
+
+  for (let i = 0; i < whorls; i++) {
+    const u = i / (whorls - 1);
+    const yBase = Y0 + 0.02 + (Y1 - Y0 - 0.05) * u;
+    const R = envelope(yBase, Y0, Y1) + 0.04;
+    const nb = Math.floor(8 + 14 * u);
+
+    for (let b = 0; b < nb; b++) {
+      const a = (Math.PI * 2 * (b + 0.45 * Math.random())) / nb + i * 0.77;
+      const L = R * rand(0.84, 1.05);
+      const count = Math.floor(24 + 95 * L);
+
+      const dx = Math.cos(a);
+      const dz = Math.sin(a);
+      const sx = -dz;
+      const sz = dx;
+
+      for (let k = 0; k < count; k++) {
+        const s = Math.pow(Math.random(), 0.82);
+        const spread = (0.024 + 0.055 * s) * rand(-1, 1);
+        const yOff = (0.055 * s * s + 0.14 * u * s * s) + rand(-0.015, 0.015);
+
+        const px = dx * s * L + sx * spread;
+        const pz = dz * s * L + sz * spread;
+        const py = yBase + yOff;
+
+        const isSnow = (s > 0.42) && (yOff < 0.055 * s * s + 0.14 * u * s * s) && (Math.random() < 0.34);
+        const needleCol = s < 0.5
+          ? lerpColor(PAL.NEEDLE_DARK, PAL.NEEDLE_MID, s * 2)
+          : lerpColor(PAL.NEEDLE_MID, PAL.NEEDLE_TIP, (s - 0.5) * 2);
+
+        parts.push({
+          x: px,
+          y: py,
+          z: pz,
+          col: isSnow ? PAL.SNOW : needleCol,
+          t0: u * 3.3 + s * 0.6,
+          kind: isSnow ? "snow" : "needle"
+        });
+      }
+
+      branchTips.push({
+        x: dx * L,
+        y: yBase + 0.055 + 0.14 * u,
+        z: dz * L,
+        u: u
+      });
+    }
+  }
+
+  // 3. Ствол
+  for (let i = 0; i < 650; i++) {
+    const y = rand(Y1 - 0.06, GROUND);
+    const phi = rand(0, Math.PI * 2);
+    const r = rand(0.03, 0.068);
+    const bark = 0.72 + 0.28 * Math.sin(14 * phi);
+    parts.push({
+      x: r * Math.cos(phi),
+      y: y,
+      z: r * Math.sin(phi),
+      col: PAL.TRUNK.map(c => Math.round(c * bark)),
+      t0: 3.4 + rand(0, 0.4),
+      kind: "trunk"
+    });
+  }
+
+  // 4. Золотая спиральная гирлянда (провисающая дугами)
+  const turns = 3.8;
+  const tinselN = 950;
+  for (let i = 0; i < tinselN; i++) {
+    const u = i / tinselN;
+    const yg = Y0 + 0.09 + (Y1 - Y0 - 0.11) * u;
+    const ag = Math.PI * 2 * turns * u + 0.8;
+    const swag = 0.045 * Math.abs(Math.sin(ag * 2.5));
+    const rg = envelope(yg, Y0, Y1) + 0.065;
+
+    parts.push({
+      x: rg * Math.cos(ag),
+      y: yg + swag,
+      z: rg * Math.sin(ag),
+      col: PAL.GOLD,
+      t0: 3.9 + u * 2.2,
+      kind: "tinsel",
+      ch: "*"
+    });
+  }
+
+  // 5. Елочные шары (объемные сферы)
+  const baubleCols = [PAL.RED, PAL.GOLD, PAL.SNOW];
+  for (let k = 0; k < 28; k++) {
+    const u = (k + 0.4) / 28;
+    const y = Y0 + 0.08 + u * (Y1 - Y0 - 0.16);
+    const R = envelope(y, Y0, Y1) + 0.045;
+    const a = 2.39996 * k + 0.3;
+    const cx = R * Math.cos(a);
+    const cz = R * Math.sin(a);
+    const col = baubleCols[k % baubleCols.length];
+
+    for (let s = 0; s < 14; s++) {
+      const theta = rand(0, Math.PI * 2);
+      const phi = rand(0, Math.PI);
+      const rad = 0.024;
+      parts.push({
+        x: cx + rad * Math.sin(phi) * Math.cos(theta),
+        y: y + rad * Math.cos(phi),
+        z: cz + rad * Math.sin(phi) * Math.sin(theta),
+        col: col,
+        t0: 5.5 + (k / 28) * 1.1,
+        kind: "bauble",
+        ch: "o"
+      });
+    }
+  }
+
+  // 6. Мерцающие огоньки на кончиках веток
+  const lightPalette = [PAL.GOLD, PAL.RED, PAL.BLUE, PAL.WHITE];
+  for (let i = 0; i < branchTips.length; i++) {
+    if (Math.random() > 0.58) continue;
+    const tip = branchTips[i];
+    const col = lightPalette[i % lightPalette.length];
+    parts.push({
+      x: tip.x,
+      y: tip.y,
+      z: tip.z,
+      col: col,
+      t0: 6.4 + tip.u * 1.0,
+      kind: "light",
+      phase: rand(0, Math.PI * 2)
+    });
+  }
+
+  // 7. Детализированные 3D-подарки под елкой (вращаются и скрываются за елкой)
+  const gifts = [
+    { x: -0.27, z:  0.16, w: 0.19, h: 0.15, d: 0.19, box: PAL.RED,       rib: PAL.GOLD,  yaw:  0.25 },
+    { x:  0.26, z:  0.18, w: 0.21, h: 0.13, d: 0.17, box: PAL.BLUE,      rib: PAL.WHITE, yaw: -0.35 },
+    { x: -0.15, z: -0.26, w: 0.17, h: 0.18, d: 0.17, box: PAL.GOLD,      rib: PAL.RED,   yaw:  0.45 },
+    { x:  0.28, z: -0.17, w: 0.18, h: 0.12, d: 0.18, box: PAL.GREEN_BOX, rib: PAL.GOLD,  yaw: -0.20 },
+    { x:  0.03, z:  0.30, w: 0.15, h: 0.11, d: 0.15, box: PAL.PURPLE,    rib: PAL.GOLD,  yaw:  0.12 },
+    { x: -0.32, z: -0.05, w: 0.14, h: 0.14, d: 0.14, box: PAL.WHITE,     rib: PAL.RED,   yaw: -0.40 }
+  ];
+
+  gifts.forEach((g, idx) => {
+    const step = 0.015;
+    const cy = Math.cos(g.yaw);
+    const sy = Math.sin(g.yaw);
+    const tGift = 7.4 + idx * 0.25;
+
+    for (let lx = -g.w / 2; lx <= g.w / 2; lx += step) {
+      for (let ly = 0; ly <= g.h; ly += step) {
+        for (let lz = -g.d / 2; lz <= g.d / 2; lz += step) {
+          const onX = Math.abs(Math.abs(lx) - g.w / 2) < step * 0.95;
+          const onZ = Math.abs(Math.abs(lz) - g.d / 2) < step * 0.95;
+          const onTop = ly > g.h - step * 0.95;
+
+          if (!onX && !onZ && !onTop) continue;
+
+          const isRibbon = Math.abs(lx) < 0.022 || Math.abs(lz) < 0.022;
+          const isLidShadow = !onTop && ly > g.h - 0.028 && ly < g.h - 0.012;
+
+          let col = isRibbon ? g.rib : g.box;
+          if (isLidShadow) {
+            col = col.map(v => Math.round(v * 0.55));
+          }
+
+          const wx = g.x + (lx * cy - lz * sy);
+          const wz = g.z + (lx * sy + lz * cy);
+          const wy = GROUND - ly;
+
+          parts.push({
+            x: wx,
+            y: wy,
+            z: wz,
+            col: col,
+            t0: tGift,
+            kind: "gift",
+            ch: isRibbon ? "+" : "#"
+          });
+        }
+      }
+    }
+
+    // Пышный бантик сверху коробки
+    for (let b = 0; b < 18; b++) {
+      const ba = (Math.PI * 2 * b) / 18;
+      const br = 0.032 * Math.abs(Math.sin(ba * 2));
+      const lx = br * Math.cos(ba);
+      const lz = br * Math.sin(ba);
+      const ly = g.h + 0.014 + 0.01 * Math.abs(Math.sin(ba * 2));
+
+      parts.push({
+        x: g.x + (lx * cy - lz * sy),
+        y: GROUND - ly,
+        z: g.z + (lx * sy + lz * cy),
+        col: g.rib,
+        t0: tGift + 0.1,
+        kind: "bow",
+        ch: "@"
+      });
+    }
+  });
+
+  // 8. Звездное небо и падающий снег на фоне
+  bgStars = [];
+  for (let i = 0; i < 210; i++) {
+    bgStars.push({
+      col: rand(0, COLS),
+      row: rand(0, ROWS),
+      vy: rand(1.2, 4.2),
+      vx: rand(-0.4, 0.4),
+      ch: Math.random() < 0.72 ? "." : (Math.random() < 0.6 ? "+" : "*"),
+      alpha: rand(0.25, 0.75)
+    });
+  }
+}
+
+const hudTime = document.getElementById("hudTime");
+const hudRot = document.getElementById("hudRot");
+const hudLetters = document.getElementById("hudLetters");
+const hudFps = document.getElementById("hudFps");
+
+function render(now) {
+  const dt = Math.min(0.05, (now - lastFrame) / 1000);
+  lastFrame = now;
+
+  if (dt > 0) {
+    fpsSmooth = fpsSmooth * 0.9 + (1 / dt) * 0.1;
+  }
+
+  if (!paused) {
+    t += dt;
+  }
+
+  updateCodePanel(t);
+
+  ctx.fillStyle = "#090c12";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const charGrid = Array.from({ length: ROWS }, () => Array(COLS).fill(" "));
+  const colGrid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+  const zBuf = Array.from({ length: ROWS }, () => Array(COLS).fill(-999));
+
+  // Фон: падающий снег и звезды
+  for (let i = 0; i < bgStars.length; i++) {
+    const s = bgStars[i];
+    if (!paused) {
+      s.row = (s.row + s.vy * dt + ROWS) % ROWS;
+      s.col = (s.col + s.vx * dt + COLS) % COLS;
+    }
+    const r = Math.floor(s.row);
+    const c = Math.floor(s.col);
+    if (r >= 0 && r < ROWS && c >= 0 && c < COLS) {
+      charGrid[r][c] = s.ch;
+      colGrid[r][c] = `rgba(175, 192, 218, ${s.alpha.toFixed(2)})`;
+    }
+  }
+
+  // Угол вращения всей 3D-сцены
+  const angle = t * 0.72;
+  const cosA = Math.cos(angle);
+  const sinA = Math.sin(angle);
+
+  let activeLetters = 0;
+
+  // Отрисовка 3D-объектов с единым Z-буфером
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+    if (t < p.t0) continue;
+
+    const grow = clamp((t - p.t0) * 3.0, 0, 1);
+    const rx = (p.x * cosA - p.z * sinA) * grow;
+    const rz = (p.x * sinA + p.z * cosA) * grow;
+    const ry = p.y;
+
+    const fov = 2.35;
+    const zCam = rz + fov;
+    if (zCam <= 0.15) continue;
+
+    const sx = rx / zCam;
+    const sy = ry / zCam;
+
+    const c = Math.round(COLS * 0.5 + sx * COLS * 0.94);
+    const r = Math.round(ROWS * 0.48 + sy * ROWS * 0.88);
+
+    if (c >= 0 && c < COLS && r >= 0 && r < ROWS) {
+      if (rz > zBuf[r][c]) {
+        zBuf[r][c] = rz;
+        activeLetters++;
+
+        const shade = clamp((rz + 0.55) / 1.15, 0.22, 1.0);
+        let ch = p.ch || RAMP[Math.floor(shade * (RAMP.length - 1))];
+        let rgb = p.col;
+
+        if (p.kind === "light") {
+          const pulse = 0.5 + 0.5 * Math.sin(t * 6.5 + p.phase);
+          ch = pulse > 0.55 ? "@" : "o";
+          rgb = rgb.map(v => Math.round(v * (0.45 + 0.55 * pulse)));
+        } else if (p.kind === "cone") {
+          ch = "#";
+        } else {
+          const lum = 0.42 + 0.58 * shade;
+          rgb = rgb.map(v => Math.min(255, Math.round(v * lum)));
+        }
+
+        charGrid[r][c] = ch;
+        colGrid[r][c] = `rgb(${rgb[0]},${rgb[1]},${rgb[2]})`;
+      }
+    }
+  }
+
+  // Лучистая пятиконечная звезда на верхушке
+  const T_STAR = 8.6;
+  if (t >= T_STAR) {
+    const starGrow = clamp((t - T_STAR) * 2.2, 0, 1);
+    const cx = Math.floor(COLS * 0.5);
+    const cy = Math.round(ROWS * 0.48 + (-0.87 / 2.35) * ROWS * 0.88);
+    const maxRay = Math.round(5 * starGrow);
+    const pulse = 0.82 + 0.18 * Math.sin(t * 7);
+
+    const drawStarCell = (r, c, ch, boost) => {
+      if (r >= 0 && r < ROWS && c >= 0 && c < COLS) {
+        const col = PAL.GOLD.map(v => Math.min(255, Math.round(v * boost * pulse)));
+        charGrid[r][c] = ch;
+        colGrid[r][c] = `rgb(${col[0]},${col[1]},${col[2]})`;
+        activeLetters++;
+      }
+    };
+
+    drawStarCell(cy, cx, "@", 1.15);
+    for (let k = 1; k <= maxRay; k++) {
+      const b = 1.05 - k * 0.08;
+      drawStarCell(cy - k, cx, k === maxRay ? "." : "|", b);
+      drawStarCell(cy + k, cx, k === maxRay ? "'" : "|", b);
+      drawStarCell(cy, cx - k * 2, k === maxRay ? "." : "-", b);
+      drawStarCell(cy, cx + k * 2, k === maxRay ? "." : "-", b);
+      if (k <= 3) {
+        drawStarCell(cy - k, cx - k, "\", b);
+        drawStarCell(cy - k, cx + k, "/", b);
+        drawStarCell(cy + k, cx - k, "/", b);
+        drawStarCell(cy + k, cx + k, "\", b);
+      }
+    }
+  }
+
+  // Поздравительная надпись: MERRY CHRISTMAS 2027
+  const T_MSG = 9.4;
+  if (t >= T_MSG) {
+    const msgRow = ROWS - 4;
+    const startCol = Math.floor((COLS - MESSAGE.length) / 2);
+    const shown = Math.min(MESSAGE.length, Math.floor((t - T_MSG) * 15));
+
+    for (let i = 0; i < shown; i++) {
+      const ch = MESSAGE[i];
+      if (ch === " ") continue;
+      const c = startCol + i;
+      if (c >= 0 && c < COLS && msgRow >= 0 && msgRow < ROWS) {
+        const wave = Math.sin(t * 4.5 - i * 0.45);
+        const col = wave > 0.35 ? PAL.GOLD : (wave < -0.35 ? PAL.RED : PAL.GREEN_BOX);
+        charGrid[msgRow][c] = ch;
+        colGrid[msgRow][c] = `rgb(${col[0]},${col[1]},${col[2]})`;
+        activeLetters++;
+      }
+    }
+  }
+
+  // Финальная отрисовка ASCII-сетки на Canvas
+  ctx.font = "11px Consolas, Menlo, Monaco, monospace";
+  ctx.textBaseline = "top";
+
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const ch = charGrid[r][c];
+      if (ch !== " ") {
+        ctx.fillStyle = colGrid[r][c];
+        ctx.fillText(ch, c * CHAR_W, r * CHAR_H);
+      }
+    }
+  }
+
+  // Обновление счетчиков HUD
+  hudTime.textContent = `t ${t.toFixed(2).padStart(5, "0")}s`;
+  const deg = ((angle * 180) / Math.PI) % 360;
+  hudRot.textContent = `${deg.toFixed(1).padStart(5, "0")}°`;
+  hudLetters.textContent = activeLetters.toLocaleString("en-US");
+  hudFps.textContent = Math.round(fpsSmooth);
+
+  requestAnimationFrame(render);
+}
+
+window.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
+    e.preventDefault();
+    paused = !paused;
+  } else if (e.code === "KeyR") {
+    t = 0;
+    lastCodeIdx = -1;
+    buildScene();
+  }
+});
+
+buildScene();
+requestAnimationFrame(render);
+</script>
+</body>
+</html>
